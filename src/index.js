@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { Box, Grommet, Select } from "grommet";
+import { Box, Button, Grommet, Select } from "grommet";
 
 import Firebase from "./firebase";
 import Auth from "./firebase/containers/Auth";
@@ -20,8 +20,40 @@ const theme = {
   }
 };
 
+function Dashboard(props) {
+  console.log(props.user.uid);
+  console.log(`/users/${props.user.uid}`);
+  return (
+    <Database dataRef={`/users/${props.user.uid}`}>
+      {({ data: dashboardData, update, create, custom }) => {
+        if (!dashboardData) {
+          return <div>no data</div>;
+        }
+        return (
+          <div>
+            <Database dataRef={`/initiatives`}>
+              {({ data: dashboardData, update, create, custom }) => {
+                return (
+                  <Button
+                    onClick={() =>
+                      create({
+                        [props.user.uid]: "owner"
+                        // [props.user.uid]: 'guest'
+                      })
+                    }
+                    label="+"
+                  />
+                );
+              }}
+            </Database>
+          </div>
+        );
+      }}
+    </Database>
+  );
+}
+
 function App() {
-  console.log("hi");
   return (
     <Grommet theme={theme}>
       <Firebase
@@ -45,8 +77,7 @@ function App() {
                   onSignUp={handleSignUp}
                 />
               </TopNav>
-              {user && <div>logged in</div>}
-              {!user && <div>not logged in</div>}
+              {user && <Dashboard user={user} />}
             </div>
           )}
         </Auth>

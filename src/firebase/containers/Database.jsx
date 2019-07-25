@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from "react";
 
-import { FirebaseContext } from '../';
+import { FirebaseContext } from "../";
 
 export default function Database({ children, dataRef, render }) {
   const { database } = useContext(FirebaseContext);
@@ -8,18 +8,20 @@ export default function Database({ children, dataRef, render }) {
   const [data, setData] = useState(null);
 
   useEffect(() => {
+    console.log("yo connecting:", dataRef);
     const ref = database.ref(dataRef);
-    const turnOff = ref.on('value', snapshot => {
+    const turnOff = ref.on("value", snapshot => {
+      console.log("@#$%^#$%^$%^#$%^", snapshot.val());
       setData(snapshot.val());
     });
-    return () => ref.off('value', turnOff);
+    return () => ref.off("value", turnOff);
   }, [dataRef]);
 
-  const update = (value, adjustRef = '') => {
+  const update = (value, adjustRef = "") => {
     database.ref(dataRef + adjustRef).set(value);
   };
 
-  const create = (value, adjustRef = '') => {
+  const create = (value, adjustRef = "") => {
     database.ref(dataRef + adjustRef).push(value);
   };
 
