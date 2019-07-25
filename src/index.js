@@ -21,32 +21,30 @@ const theme = {
 };
 
 function Dashboard(props) {
-  console.log(props.user.uid);
-  console.log(`/users/${props.user.uid}`);
   return (
     <Database dataRef={`/users/${props.user.uid}`}>
-      {({ data: dashboardData, update, create, custom }) => {
-        if (!dashboardData) {
-          return <div>no data</div>;
-        }
+      {({
+        data: userData,
+        update: userUpdate,
+        create: userCreate,
+        custom: userCustom
+      }) => {
         return (
-          <div>
-            <Database dataRef={`/initiatives`}>
-              {({ data: dashboardData, update, create, custom }) => {
-                return (
-                  <Button
-                    onClick={() =>
-                      create({
-                        [props.user.uid]: "owner"
-                        // [props.user.uid]: 'guest'
-                      })
-                    }
-                    label="+"
-                  />
-                );
-              }}
-            </Database>
-          </div>
+          <>
+            <Button onClick={() => alert("go make init :P")} label="+" />
+            <div>
+              {userData &&
+                userData.initiatives &&
+                Object.keys(userData.initiatives).map(id => {
+                  console.log("INIT => ", id);
+                  return (
+                    <div>
+                      {id} -> {userData.initiatives[id]}
+                    </div>
+                  );
+                })}
+            </div>
+          </>
         );
       }}
     </Database>
