@@ -1,6 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
-import { Box, Button, Grommet, Select } from "grommet";
+import {
+  Box,
+  Button,
+  Grommet,
+  Select,
+  Heading,
+  FormField,
+  TextInput
+} from "grommet";
+import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 
 import Firebase from "./firebase";
 import Auth from "./firebase/containers/Auth";
@@ -20,9 +29,53 @@ const theme = {
   }
 };
 
-function Dashboard(props) {
+function Initiative({ user, match, location, history }) {
+  const [value, setValue] = useState("");
   return (
-    <Database dataRef={`/users/${props.user.uid}`}>
+    <Database dataRef={`/initiativeData/${match.params.initiativeId}`}>
+      {({
+        data: initiativeData,
+        update: initiativeUpdate,
+        create: initiativeCreate,
+        custom: initiativeCustom
+      }) => {
+        if (!initiativeData) {
+          return <div>ask your dm for access...</div>;
+        }
+        return (
+          <div>
+            <Heading margin="none">{initiativeData.name}</Heading>
+            <Box>
+              <FormField label="Role for initiative">
+                <TextInput
+                  placeholder="type here"
+                  value={value}
+                  onChange={event => setValue(event.target.value)}
+                />
+              </FormField>
+              <Button
+                label="Roll"
+                onClick={() =>
+                  initiativeUpdate({
+                    ...initiativeData,
+                    text: initiativeData.text
+                      ? initiativeData.text + value
+                      : value
+                  })
+                }
+              />
+              <Heading margin="none">{initiativeData.text}</Heading>
+            </Box>
+          </div>
+        );
+      }}
+    </Database>
+  );
+}
+
+function Dashboard({ user, match, location, history }) {
+  return (
+    <Database dataRef={`/users/${user.uid}`}>
       {({
         data: userData,
         update: userUpdate,
@@ -39,7 +92,9 @@ function Dashboard(props) {
                   console.log("INIT => ", id);
                   return (
                     <div>
-                      {id} -> {userData.initiatives[id]}
+                      <Link to={`/initiatives/${id}`}>
+                        {id} -> {userData.initiatives[id]}
+                      </Link>
                     </div>
                   );
                 })}
@@ -75,7 +130,18 @@ function App() {
                   onSignUp={handleSignUp}
                 />
               </TopNav>
-              {user && <Dashboard user={user} />}
+              {user && (
+                <Router>
+                  <Switch>
+                    <Route path="/" exact>
+                      {routeProps => <Dashboard user={user} {...routeProps} />}
+                    </Route>
+                    <Route path="/initiatives/:initiativeId">
+                      {routeProps => <Initiative user={user} {...routeProps} />}
+                    </Route>
+                  </Switch>
+                </Router>
+              )}
             </div>
           )}
         </Auth>
