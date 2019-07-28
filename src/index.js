@@ -36,19 +36,21 @@ const theme = {
 //item types
 
 const ItemTypes = {
-  KNIGHT: "knight"
+  PLAYER: "player",
+  NPC: "npc",
+  OBSTACLE: "obstacle"
 };
 
-//knight
+//player
 
-const knightStyle = {
+const playerStyle = {
   fontSize: 40,
   fontWeight: "bold",
   cursor: "move"
 };
-export const Knight = () => {
+export const Player = () => {
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.KNIGHT },
+    item: { type: ItemTypes.PLAYER },
     collect: monitor => ({
       isDragging: !!monitor.isDragging()
     })
@@ -60,7 +62,7 @@ export const Knight = () => {
       <div
         ref={drag}
         style={{
-          ...knightStyle,
+          ...playerStyle,
           opacity: isDragging ? 0.1 : 1
         }}
       >
@@ -113,11 +115,11 @@ export const Square = ({ black, children }) => {
 
 /// board square
 
-export const BoardSquare = ({ x, y, children, setKnightPos }) => {
+export const BoardSquare = ({ x, y, children, setPlayerPos }) => {
   const [{ isOver, canDrop }, drop] = useDrop({
-    accept: ItemTypes.KNIGHT,
-    // canDrop: () => canMoveKnight(x, y),
-    drop: () => setKnightPos([x, y]),
+    accept: ItemTypes.PLAYER,
+    // canDrop: () => canMovePlayer(x, y),
+    drop: () => setPlayerPos([x, y]),
     // drop: () => console.log(x, y),
     collect: monitor => ({
       isOver: !!monitor.isOver(),
@@ -157,21 +159,21 @@ const squareStyle2 = { width: "12.5%", height: "12.5%" };
  * The chessboard component
  * @param props The react props
  */
-const Board = ({ knightPosition: [knightX, knightY], setKnightPos }) => {
+const Board = ({ playerPosition: [playerX, playerY], setPlayerPos }) => {
   function renderSquare(i) {
     const x = i % 8;
     const y = Math.floor(i / 8);
     return (
       <div key={i} style={squareStyle2}>
-        <BoardSquare x={x} y={y} setKnightPos={setKnightPos}>
+        <BoardSquare x={x} y={y} setPlayerPos={setPlayerPos}>
           {renderPiece(x, y)}
         </BoardSquare>
       </div>
     );
   }
   function renderPiece(x, y) {
-    const isKnightHere = x === knightX && y === knightY;
-    return isKnightHere ? <Knight /> : null;
+    const isPlayerHere = x === playerX && y === playerY;
+    return isPlayerHere ? <Player /> : null;
   }
   const squares = [];
   for (let i = 0; i < 64; i += 1) {
@@ -191,15 +193,15 @@ const containerStyle = {
  * The Chessboard Tutorial Application
  */
 const Example = () => {
-  const [knightPos, setKnightPos] = useState([1, 7]);
+  const [playerPos, setPlayerPos] = useState([1, 7]);
   // the observe function will return an unsubscribe callback
-  // useEffect(() => observe(newPos => setKnightPos(newPos)))
+  // useEffect(() => observe(newPos => setPlayerPos(newPos)))
   // the obove is all about mocking a real time db
-  console.log(knightPos);
+  console.log(playerPos);
   return (
     <div>
       <div style={containerStyle}>
-        <Board knightPosition={knightPos} setKnightPos={setKnightPos} />
+        <Board playerPosition={playerPos} setPlayerPos={setPlayerPos} />
       </div>
     </div>
   );
