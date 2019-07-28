@@ -11,6 +11,10 @@ import {
 } from "grommet";
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 
+// import Example from './example'
+import { DndProvider, DragPreviewImage, useDrop, useDrag } from "react-dnd";
+import HTML5Backend from "react-dnd-html5-backend";
+
 import Firebase from "./firebase";
 import Auth from "./firebase/containers/Auth";
 import Database from "./firebase/containers/Database";
@@ -27,6 +31,178 @@ const theme = {
       height: "20px"
     }
   }
+};
+
+//item types
+
+const ItemTypes = {
+  KNIGHT: "knight"
+};
+
+//knight
+
+const knightStyle = {
+  fontSize: 40,
+  fontWeight: "bold",
+  cursor: "move"
+};
+export const Knight = () => {
+  const [{ isDragging }, drag, preview] = useDrag({
+    item: { type: ItemTypes.KNIGHT },
+    collect: monitor => ({
+      isDragging: !!monitor.isDragging()
+    })
+  });
+  console.log(isDragging);
+  return (
+    <>
+      <DragPreviewImage connect={preview} />
+      <div
+        ref={drag}
+        style={{
+          ...knightStyle,
+          opacity: isDragging ? 0.1 : 1
+        }}
+      >
+        ♘
+      </div>
+    </>
+  );
+};
+
+//overlay
+
+const Overlay = ({ color }) => {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        height: "100%",
+        width: "100%",
+        zIndex: 1,
+        opacity: 0.5,
+        backgroundColor: color
+      }}
+    />
+  );
+};
+
+//square
+
+const squareStyle = {
+  width: "100%",
+  height: "100%"
+};
+export const Square = ({ black, children }) => {
+  const backgroundColor = black ? "black" : "white";
+  const color = black ? "white" : "black";
+  return (
+    <div
+      style={{
+        ...squareStyle,
+        color,
+        backgroundColor
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+/// board square
+
+export const BoardSquare = ({ x, y, children, setKnightPos }) => {
+  const [{ isOver, canDrop }, drop] = useDrop({
+    accept: ItemTypes.KNIGHT,
+    // canDrop: () => canMoveKnight(x, y),
+    drop: () => setKnightPos([x, y]),
+    // drop: () => console.log(x, y),
+    collect: monitor => ({
+      isOver: !!monitor.isOver(),
+      canDrop: !!monitor.canDrop()
+    })
+  });
+  const black = (x + y) % 2 === 1;
+  return (
+    <div
+      ref={drop}
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%"
+      }}
+    >
+      <Square black={black}>{children}</Square>
+      {/* {isOver && !canDrop && <Overlay color="red" />} */}
+      {/* {!isOver && canDrop && <Overlay color="yellow" />} */}
+      {isOver && <Overlay color="green" />}
+    </div>
+  );
+};
+
+/// borad
+
+/** Styling properties applied to the board element */
+const boardStyle = {
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  flexWrap: "wrap"
+};
+/** Styling properties applied to each square element */
+const squareStyle2 = { width: "12.5%", height: "12.5%" };
+/**
+ * The chessboard component
+ * @param props The react props
+ */
+const Board = ({ knightPosition: [knightX, knightY], setKnightPos }) => {
+  function renderSquare(i) {
+    const x = i % 8;
+    const y = Math.floor(i / 8);
+    return (
+      <div key={i} style={squareStyle2}>
+        <BoardSquare x={x} y={y} setKnightPos={setKnightPos}>
+          {renderPiece(x, y)}
+        </BoardSquare>
+      </div>
+    );
+  }
+  function renderPiece(x, y) {
+    const isKnightHere = x === knightX && y === knightY;
+    return isKnightHere ? <Knight /> : null;
+  }
+  const squares = [];
+  for (let i = 0; i < 64; i += 1) {
+    squares.push(renderSquare(i));
+  }
+  return <div style={boardStyle}>{squares}</div>;
+};
+
+/// ex
+
+const containerStyle = {
+  width: 500,
+  height: 500,
+  border: "1px solid gray"
+};
+/**
+ * The Chessboard Tutorial Application
+ */
+const Example = () => {
+  const [knightPos, setKnightPos] = useState([1, 7]);
+  // the observe function will return an unsubscribe callback
+  // useEffect(() => observe(newPos => setKnightPos(newPos)))
+  // the obove is all about mocking a real time db
+  console.log(knightPos);
+  return (
+    <div>
+      <div style={containerStyle}>
+        <Board knightPosition={knightPos} setKnightPos={setKnightPos} />
+      </div>
+    </div>
+  );
 };
 
 function Initiative({ user, match, location, history }) {
@@ -46,25 +222,9 @@ function Initiative({ user, match, location, history }) {
           <div>
             <Heading margin="none">{initiativeData.name}</Heading>
             <Box>
-              <FormField label="Role for initiative">
-                <TextInput
-                  placeholder="type here"
-                  value={value}
-                  onChange={event => setValue(event.target.value)}
-                />
-              </FormField>
-              <Button
-                label="Roll"
-                onClick={() =>
-                  initiativeUpdate({
-                    ...initiativeData,
-                    text: initiativeData.text
-                      ? initiativeData.text + value
-                      : value
-                  })
-                }
-              />
-              <Heading margin="none">{initiativeData.text}</Heading>
+              <DndProvider backend={HTML5Backend}>
+                <Example />
+              </DndProvider>
             </Box>
           </div>
         );
@@ -89,7 +249,6 @@ function Dashboard({ user, match, location, history }) {
               {userData &&
                 userData.initiatives &&
                 Object.keys(userData.initiatives).map(id => {
-                  console.log("INIT => ", id);
                   return (
                     <div>
                       <Link to={`/initiatives/${id}`}>

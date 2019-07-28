@@ -7,9 +7,9 @@
   signUp, signIn, signOut
 */
 
-import React, { useState, useEffect, useContext } from 'react';
-import PropTypes from 'prop-types';
-import { FirebaseContext } from '../';
+import React, { useState, useEffect, useContext } from "react";
+import PropTypes from "prop-types";
+import { FirebaseContext } from "../";
 // import { handleSignUp, handleSignIn, handleSignOut } from '../auth';
 
 // import { auth } from '../../firebase';
@@ -21,8 +21,6 @@ import { FirebaseContext } from '../';
 export default function Auth({ children, render }) {
   const fb = useContext(FirebaseContext);
   const { auth } = fb;
-  console.log('fb', fb);
-  console.log('auth', auth);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -37,20 +35,20 @@ export default function Auth({ children, render }) {
 
   function handleSignUp({ email, password }) {
     if (email.length < 4) {
-      alert('Please enter an email address.');
+      alert("Please enter an email address.");
       return;
     }
 
     if (password.length < 4) {
-      alert('Please enter a password.');
+      alert("Please enter a password.");
       return;
     }
 
     auth.createUserWithEmailAndPassword(email, password).catch(error => {
       const errorCode = error.code;
       const errorMessage = error.message;
-      if (errorCode === 'auth/weak-password') {
-        alert('The password is too weak.');
+      if (errorCode === "auth/weak-password") {
+        alert("The password is too weak.");
       } else {
         alert(errorMessage);
       }
@@ -66,18 +64,18 @@ export default function Auth({ children, render }) {
       auth.signOut();
     } else {
       if (email.length < 4) {
-        alert('Please enter an email address.');
+        alert("Please enter an email address.");
         return;
       }
       if (password.length < 4) {
-        alert('Please enter a password.');
+        alert("Please enter a password.");
         return;
       }
       auth.signInWithEmailAndPassword(email, password).catch(error => {
         const errorCode = error.code;
         const errorMessage = error.message;
-        if (errorCode === 'auth/wrong-password') {
-          alert('Wrong password.');
+        if (errorCode === "auth/wrong-password") {
+          alert("Wrong password.");
         } else {
           alert(errorMessage);
         }
@@ -93,7 +91,7 @@ export default function Auth({ children, render }) {
     if (auth.currentUser) {
       auth.signOut();
     } else {
-      console.warn('No user to log out');
+      console.warn("No user to log out");
     }
   }
 
@@ -102,7 +100,7 @@ export default function Auth({ children, render }) {
    */
   function sendEmailVerification() {
     auth.currentUser.sendEmailVerification().then(() => {
-      alert('Email Verification Sent!');
+      alert("Email Verification Sent!");
     });
   }
 
@@ -110,15 +108,15 @@ export default function Auth({ children, render }) {
     auth
       .sendPasswordResetEmail(email)
       .then(() => {
-        alert('Password Reset Email Sent!');
+        alert("Password Reset Email Sent!");
       })
       .catch(error => {
         const errorCode = error.code;
         const errorMessage = error.message;
 
-        if (errorCode === 'auth/invalid-email') {
+        if (errorCode === "auth/invalid-email") {
           alert(errorMessage);
-        } else if (errorCode === 'auth/user-not-found') {
+        } else if (errorCode === "auth/user-not-found") {
           alert(errorMessage);
         }
         console.log(error);
