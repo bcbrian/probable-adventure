@@ -46,7 +46,11 @@ const ItemTypes = {
 const playerStyle = {
   fontSize: 40,
   fontWeight: "bold",
-  cursor: "move"
+  cursor: "move",
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translateX(-55%) translateY(-25%)"
 };
 export const Player = () => {
   const [{ isDragging }, drag, preview] = useDrag({
@@ -66,7 +70,7 @@ export const Player = () => {
           opacity: isDragging ? 0.1 : 1
         }}
       >
-        ♘
+        ◆
       </div>
     </>
   );
