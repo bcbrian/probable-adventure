@@ -50,7 +50,8 @@ const playerStyle = {
   position: "absolute",
   top: "50%",
   left: "50%",
-  transform: "translateX(-55%) translateY(-25%)"
+  transform: "translateX(-50%) translateY(-25%)",
+  boxSizing: "border-box"
 };
 export const Player = () => {
   const [{ isDragging }, drag, preview] = useDrag({
@@ -89,7 +90,8 @@ const Overlay = ({ color }) => {
         width: "100%",
         zIndex: 1,
         opacity: 0.5,
-        backgroundColor: color
+        backgroundColor: color,
+        boxSizing: "border-box"
       }}
     />
   );
@@ -99,17 +101,15 @@ const Overlay = ({ color }) => {
 
 const squareStyle = {
   width: "100%",
-  height: "100%"
+  height: "100%",
+  border: "1px solid grey",
+  boxSizing: "border-box"
 };
 export const Square = ({ black, children }) => {
-  const backgroundColor = black ? "black" : "white";
-  const color = black ? "white" : "black";
   return (
     <div
       style={{
-        ...squareStyle,
-        color,
-        backgroundColor
+        ...squareStyle
       }}
     >
       {children}
@@ -155,7 +155,8 @@ const boardStyle = {
   width: "100%",
   height: "100%",
   display: "flex",
-  flexWrap: "wrap"
+  flexWrap: "wrap",
+  boxSizing: "border-box"
 };
 /** Styling properties applied to each square element */
 const squareStyle2 = { width: "12.5%", height: "12.5%" };
@@ -191,7 +192,8 @@ const Board = ({ playerPosition: [playerX, playerY], setPlayerPos }) => {
 const containerStyle = {
   width: 500,
   height: 500,
-  border: "1px solid gray"
+  border: "1px solid gray",
+  boxSizing: "border-box"
 };
 /**
  * The Chessboard Tutorial Application
