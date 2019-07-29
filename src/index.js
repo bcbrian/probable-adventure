@@ -187,7 +187,7 @@ const Board = ({ playerPosition: [playerX, playerY], setPlayerPos }) => {
   return <div style={boardStyle}>{squares}</div>;
 };
 
-/// ex
+/// Example
 
 const containerStyle = {
   width: 500,
