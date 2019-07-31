@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import {
   Box,
@@ -36,19 +36,22 @@ const theme = {
 //item types
 
 const ItemTypes = {
-  PLAYER: "player"
+  PLAYER: "player",
+  NPC: "npc",
+  OBSTACLE: "obstacle"
 };
 
-//knight
+//player
 
-const knightStyle = {
+const playerStyle = {
   fontSize: 40,
   fontWeight: "bold",
   cursor: "move",
-  color: "rebeccapurple",
-  width: "75%",
-  height: "75%",
-  backgroundColor: "rebeccapurple"
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translateX(-50%) translateY(-25%)",
+  boxSizing: "border-box"
 };
 export const Player = () => {
   const [{ isDragging }, drag, preview] = useDrag({
@@ -57,16 +60,19 @@ export const Player = () => {
       isDragging: !!monitor.isDragging()
     })
   });
+  console.log(isDragging);
   return (
     <>
       <DragPreviewImage connect={preview} />
       <div
         ref={drag}
         style={{
-          ...knightStyle,
-          opacity: isDragging ? 0.6 : 1
+          ...playerStyle,
+          opacity: isDragging ? 0.1 : 1
         }}
-      />
+      >
+        ◆
+      </div>
     </>
   );
 };
@@ -84,7 +90,8 @@ const Overlay = ({ color }) => {
         width: "100%",
         zIndex: 1,
         opacity: 0.5,
-        backgroundColor: color
+        backgroundColor: color,
+        boxSizing: "border-box"
       }}
     />
   );
@@ -95,20 +102,14 @@ const Overlay = ({ color }) => {
 const squareStyle = {
   width: "100%",
   height: "100%",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  border: "1px solid black"
+  border: "1px solid grey",
+  boxSizing: "border-box"
 };
 export const Square = ({ black, children }) => {
-  const backgroundColor = black ? "black" : "white";
-  const color = black ? "white" : "black";
   return (
     <div
       style={{
-        ...squareStyle,
-        color,
-        backgroundColor
+        ...squareStyle
       }}
     >
       {children}
@@ -118,17 +119,18 @@ export const Square = ({ black, children }) => {
 
 /// board square
 
-export const BoardSquare = ({ x, y, children, setKnightPos }) => {
+export const BoardSquare = ({ x, y, children, setPlayerPos }) => {
   const [{ isOver, canDrop }, drop] = useDrop({
     accept: ItemTypes.PLAYER,
-    // canDrop: () => canMoveKnight(x, y),
-    drop: () => setKnightPos([x, y]),
+    // canDrop: () => canMovePlayer(x, y),
+    drop: () => setPlayerPos([x, y]),
     // drop: () => console.log(x, y),
     collect: monitor => ({
       isOver: !!monitor.isOver(),
       canDrop: !!monitor.canDrop()
     })
   });
+  const black = (x + y) % 2 === 1;
   return (
     <div
       ref={drop}
@@ -138,7 +140,7 @@ export const BoardSquare = ({ x, y, children, setKnightPos }) => {
         height: "100%"
       }}
     >
-      <Square>{children}</Square>
+      <Square black={black}>{children}</Square>
       {/* {isOver && !canDrop && <Overlay color="red" />} */}
       {/* {!isOver && canDrop && <Overlay color="yellow" />} */}
       {isOver && <Overlay color="green" />}
@@ -153,76 +155,59 @@ const boardStyle = {
   width: "100%",
   height: "100%",
   display: "flex",
-  flexWrap: "wrap"
+  flexWrap: "wrap",
+  boxSizing: "border-box"
 };
-
+/** Styling properties applied to each square element */
+const squareStyle2 = { width: "12.5%", height: "12.5%" };
 /**
  * The chessboard component
  * @param props The react props
  */
-const Board = ({
-  knightPosition: [knightX, knightY],
-  setKnightPos,
-  height = 4,
-  width = 4
-}) => {
-  /** Styling properties applied to each square element */
-  const squareStyle2 = {
-    width: `calc(100% / ${width})`,
-    height: `calc(100% / ${height})`
-  };
+const Board = ({ playerPosition: [playerX, playerY], setPlayerPos }) => {
   function renderSquare(i) {
-    const x = i % width;
-    const y = Math.floor(i / height);
+    const x = i % 8;
+    const y = Math.floor(i / 8);
     return (
       <div key={i} style={squareStyle2}>
-        <BoardSquare x={x} y={y} setKnightPos={setKnightPos}>
+        <BoardSquare x={x} y={y} setPlayerPos={setPlayerPos}>
           {renderPiece(x, y)}
         </BoardSquare>
       </div>
     );
   }
   function renderPiece(x, y) {
-    const isKnightHere = x === knightX && y === knightY;
-    return isKnightHere ? <Player /> : null;
+    const isPlayerHere = x === playerX && y === playerY;
+    return isPlayerHere ? <Player /> : null;
   }
   const squares = [];
-  for (let i = 0; i < width * height; i += 1) {
+  for (let i = 0; i < 64; i += 1) {
     squares.push(renderSquare(i));
   }
   return <div style={boardStyle}>{squares}</div>;
 };
 
-/// ex
+/// Example
 
+const containerStyle = {
+  width: 500,
+  height: 500,
+  border: "1px solid gray",
+  boxSizing: "border-box"
+};
 /**
  * The Chessboard Tutorial Application
  */
-const Example = ({ width, height, playerPos, setPlayerPos }) => {
-  const [knightPos, setKnightPos] = useState([playerPos.x, playerPos.y]);
+const Example = () => {
+  const [playerPos, setPlayerPos] = useState([1, 7]);
   // the observe function will return an unsubscribe callback
-  useEffect(() => setKnightPos([playerPos.x, playerPos.y]), [
-    playerPos.x,
-    playerPos.y
-  ]);
+  // useEffect(() => observe(newPos => setPlayerPos(newPos)))
   // the obove is all about mocking a real time db
-  console.log(knightPos);
-  const containerStyle = {
-    width: `calc(${width} * 80px)`,
-    height: `calc(${height} * 80px)`
-  };
+  console.log(playerPos);
   return (
     <div>
       <div style={containerStyle}>
-        <Board
-          knightPosition={knightPos}
-          setKnightPos={([x, y]) => {
-            setKnightPos([x, y]);
-            setPlayerPos({ x, y });
-          }}
-          width={width}
-          height={height}
-        />
+        <Board playerPosition={playerPos} setPlayerPos={setPlayerPos} />
       </div>
     </div>
   );
@@ -246,14 +231,7 @@ function Initiative({ user, match, location, history }) {
             <Heading margin="none">{initiativeData.name}</Heading>
             <Box>
               <DndProvider backend={HTML5Backend}>
-                <Example
-                  width={initiativeData.size.x}
-                  height={initiativeData.size.y}
-                  playerPos={initiativeData.playerPos}
-                  setPlayerPos={({ x, y }) =>
-                    initiativeUpdate({ x, y }, "/playerPos")
-                  }
-                />
+                <Example />
               </DndProvider>
             </Box>
           </div>
@@ -265,33 +243,35 @@ function Initiative({ user, match, location, history }) {
 
 function Dashboard({ user, match, location, history }) {
   return (
-    <Database dataRef={`/users/${user.uid}`}>
-      {({
-        data: userData,
-        update: userUpdate,
-        create: userCreate,
-        custom: userCustom
-      }) => {
-        return (
-          <>
-            <Button onClick={() => alert("go make init :P")} label="+" />
-            <div>
-              {userData &&
-                userData.initiatives &&
-                Object.keys(userData.initiatives).map(id => {
-                  return (
-                    <div>
-                      <Link to={`/initiatives/${id}`}>
-                        {id} -> {userData.initiatives[id]}
-                      </Link>
-                    </div>
-                  );
-                })}
-            </div>
-          </>
-        );
-      }}
-    </Database>
+    <>
+      <Database dataRef={`/users/${user.uid}`}>
+        {({
+          data: userData,
+          update: userUpdate,
+          create: userCreate,
+          custom: userCustom
+        }) => {
+          return (
+            <>
+              <Button onClick={() => alert("go make init :P")} label="+" />
+              <div>
+                {userData &&
+                  userData.initiatives &&
+                  Object.keys(userData.initiatives).map(id => {
+                    return (
+                      <div>
+                        <Link to={`/initiatives/${id}`}>
+                          {id} -> {userData.initiatives[id]}
+                        </Link>
+                      </div>
+                    );
+                  })}
+              </div>
+            </>
+          );
+        }}
+      </Database>
+    </>
   );
 }
 
