@@ -15,6 +15,8 @@ import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import { DndProvider, DragPreviewImage, useDrop, useDrag } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 
+import { createGlobalStyle } from "styled-components";
+
 import Firebase from "./firebase";
 import Auth from "./firebase/containers/Auth";
 import Database from "./firebase/containers/Database";
@@ -310,9 +312,16 @@ function Dashboard({ user, match, location, history }) {
   );
 }
 
+const GlobalStyle = createGlobalStyle`
+  body {
+    box-sizing: border-box;
+  }
+`;
+
 function App() {
   return (
     <Grommet theme={theme}>
+      <GlobalStyle />
       <Firebase
         config={{
           apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
