@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import firebase from 'firebase';
+import React, { useEffect, useState } from "react";
+import firebase from "firebase";
 
 const FirebaseContext = React.createContext({
   // default firebase context
@@ -13,7 +13,6 @@ export default function Firebase({ config, children }) {
   });
 
   useEffect(() => {
-    console.log('=> ', config);
     firebase.initializeApp(config);
     const database = firebase.database();
     const auth = firebase.auth();
@@ -24,8 +23,6 @@ export default function Firebase({ config, children }) {
       auth
     });
   }, [config.apiKey]);
-
-  console.log('FB YO: ', fb);
 
   return (
     <FirebaseContext.Provider value={{ ...fb }}>

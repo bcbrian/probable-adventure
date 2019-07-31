@@ -8,10 +8,8 @@ export default function Database({ children, dataRef, render }) {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    console.log("yo connecting:", dataRef);
     const ref = database.ref(dataRef);
     const turnOff = ref.on("value", snapshot => {
-      console.log("@#$%^#$%^$%^#$%^", snapshot.val());
       setData(snapshot.val());
     });
     return () => ref.off("value", turnOff);
