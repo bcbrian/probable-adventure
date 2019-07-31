@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import {
   Box,
@@ -10,6 +10,10 @@ import {
   TextInput
 } from "grommet";
 import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+
+// import Example from './example'
+import { DndProvider, DragPreviewImage, useDrop, useDrag } from "react-dnd";
+import HTML5Backend from "react-dnd-html5-backend";
 
 import Firebase from "./firebase";
 import Auth from "./firebase/containers/Auth";
@@ -29,6 +33,201 @@ const theme = {
   }
 };
 
+//item types
+
+const ItemTypes = {
+  PLAYER: "player"
+};
+
+//knight
+
+const knightStyle = {
+  fontSize: 40,
+  fontWeight: "bold",
+  cursor: "move",
+  color: "rebeccapurple",
+  width: "75%",
+  height: "75%",
+  backgroundColor: "rebeccapurple"
+};
+export const Player = () => {
+  const [{ isDragging }, drag, preview] = useDrag({
+    item: { type: ItemTypes.PLAYER },
+    collect: monitor => ({
+      isDragging: !!monitor.isDragging()
+    })
+  });
+  return (
+    <>
+      <DragPreviewImage connect={preview} />
+      <div
+        ref={drag}
+        style={{
+          ...knightStyle,
+          opacity: isDragging ? 0.6 : 1
+        }}
+      />
+    </>
+  );
+};
+
+//overlay
+
+const Overlay = ({ color }) => {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        height: "100%",
+        width: "100%",
+        zIndex: 1,
+        opacity: 0.5,
+        backgroundColor: color
+      }}
+    />
+  );
+};
+
+//square
+
+const squareStyle = {
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  border: "1px solid black"
+};
+export const Square = ({ black, children }) => {
+  const backgroundColor = black ? "black" : "white";
+  const color = black ? "white" : "black";
+  return (
+    <div
+      style={{
+        ...squareStyle,
+        color,
+        backgroundColor
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+/// board square
+
+export const BoardSquare = ({ x, y, children, setKnightPos }) => {
+  const [{ isOver, canDrop }, drop] = useDrop({
+    accept: ItemTypes.PLAYER,
+    // canDrop: () => canMoveKnight(x, y),
+    drop: () => setKnightPos([x, y]),
+    // drop: () => console.log(x, y),
+    collect: monitor => ({
+      isOver: !!monitor.isOver(),
+      canDrop: !!monitor.canDrop()
+    })
+  });
+  return (
+    <div
+      ref={drop}
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%"
+      }}
+    >
+      <Square>{children}</Square>
+      {/* {isOver && !canDrop && <Overlay color="red" />} */}
+      {/* {!isOver && canDrop && <Overlay color="yellow" />} */}
+      {isOver && <Overlay color="green" />}
+    </div>
+  );
+};
+
+/// borad
+
+/** Styling properties applied to the board element */
+const boardStyle = {
+  width: "100%",
+  height: "100%",
+  display: "flex",
+  flexWrap: "wrap"
+};
+
+/**
+ * The chessboard component
+ * @param props The react props
+ */
+const Board = ({
+  knightPosition: [knightX, knightY],
+  setKnightPos,
+  height = 4,
+  width = 4
+}) => {
+  /** Styling properties applied to each square element */
+  const squareStyle2 = {
+    width: `calc(100% / ${width})`,
+    height: `calc(100% / ${height})`
+  };
+  function renderSquare(i) {
+    const x = i % width;
+    const y = Math.floor(i / height);
+    return (
+      <div key={i} style={squareStyle2}>
+        <BoardSquare x={x} y={y} setKnightPos={setKnightPos}>
+          {renderPiece(x, y)}
+        </BoardSquare>
+      </div>
+    );
+  }
+  function renderPiece(x, y) {
+    const isKnightHere = x === knightX && y === knightY;
+    return isKnightHere ? <Player /> : null;
+  }
+  const squares = [];
+  for (let i = 0; i < width * height; i += 1) {
+    squares.push(renderSquare(i));
+  }
+  return <div style={boardStyle}>{squares}</div>;
+};
+
+/// ex
+
+/**
+ * The Chessboard Tutorial Application
+ */
+const Example = ({ width, height, playerPos, setPlayerPos }) => {
+  const [knightPos, setKnightPos] = useState([playerPos.x, playerPos.y]);
+  // the observe function will return an unsubscribe callback
+  useEffect(() => setKnightPos([playerPos.x, playerPos.y]), [
+    playerPos.x,
+    playerPos.y
+  ]);
+  // the obove is all about mocking a real time db
+  console.log(knightPos);
+  const containerStyle = {
+    width: `calc(${width} * 80px)`,
+    height: `calc(${height} * 80px)`
+  };
+  return (
+    <div>
+      <div style={containerStyle}>
+        <Board
+          knightPosition={knightPos}
+          setKnightPos={([x, y]) => {
+            setKnightPos([x, y]);
+            setPlayerPos({ x, y });
+          }}
+          width={width}
+          height={height}
+        />
+      </div>
+    </div>
+  );
+};
+
 function Initiative({ user, match, location, history }) {
   const [value, setValue] = useState("");
   return (
@@ -46,25 +245,16 @@ function Initiative({ user, match, location, history }) {
           <div>
             <Heading margin="none">{initiativeData.name}</Heading>
             <Box>
-              <FormField label="Role for initiative">
-                <TextInput
-                  placeholder="type here"
-                  value={value}
-                  onChange={event => setValue(event.target.value)}
+              <DndProvider backend={HTML5Backend}>
+                <Example
+                  width={initiativeData.size.x}
+                  height={initiativeData.size.y}
+                  playerPos={initiativeData.playerPos}
+                  setPlayerPos={({ x, y }) =>
+                    initiativeUpdate({ x, y }, "/playerPos")
+                  }
                 />
-              </FormField>
-              <Button
-                label="Roll"
-                onClick={() =>
-                  initiativeUpdate({
-                    ...initiativeData,
-                    text: initiativeData.text
-                      ? initiativeData.text + value
-                      : value
-                  })
-                }
-              />
-              <Heading margin="none">{initiativeData.text}</Heading>
+              </DndProvider>
             </Box>
           </div>
         );
@@ -89,7 +279,6 @@ function Dashboard({ user, match, location, history }) {
               {userData &&
                 userData.initiatives &&
                 Object.keys(userData.initiatives).map(id => {
-                  console.log("INIT => ", id);
                   return (
                     <div>
                       <Link to={`/initiatives/${id}`}>
