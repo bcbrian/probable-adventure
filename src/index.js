@@ -50,9 +50,9 @@ const knightStyle = {
   height: "75%",
   backgroundColor: "rebeccapurple"
 };
-export const Player = () => {
+export const Player = ({ playerId }) => {
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.PLAYER },
+    item: { type: ItemTypes.PLAYER, playerId },
     collect: monitor => ({
       isDragging: !!monitor.isDragging()
     })
@@ -118,17 +118,31 @@ export const Square = ({ black, children }) => {
 
 /// board square
 
-export const BoardSquare = ({ x, y, children, setKnightPos }) => {
-  const [{ isOver, canDrop }, drop] = useDrop({
+export const BoardSquare = ({ x, y, children, setLocalPlayer }) => {
+  const [playerId, setPlayerId] = useState(null);
+  const [{ isOver, canDrop, item }, drop] = useDrop({
     accept: ItemTypes.PLAYER,
     // canDrop: () => canMoveKnight(x, y),
-    drop: () => setKnightPos([x, y]),
+    drop: () => {
+      debugger;
+      setLocalPlayer(playerId, { x, y });
+      setPlayerId(null);
+    },
     // drop: () => console.log(x, y),
-    collect: monitor => ({
-      isOver: !!monitor.isOver(),
-      canDrop: !!monitor.canDrop()
-    })
+    collect: monitor => {
+      console.log("MONITOR LIZARD ", monitor);
+      return {
+        isOver: !!monitor.isOver(),
+        canDrop: !!monitor.canDrop(),
+        item: monitor.getItem() || {}
+      };
+    }
   });
+
+  useEffect(() => {
+    setPlayerId(item.playerId);
+  }, [item.playerId]);
+
   return (
     <div
       ref={drop}
@@ -160,12 +174,7 @@ const boardStyle = {
  * The chessboard component
  * @param props The react props
  */
-const Board = ({
-  knightPosition: [knightX, knightY],
-  setKnightPos,
-  height = 4,
-  width = 4
-}) => {
+const Board = ({ players, setLocalPlayer, height, width }) => {
   /** Styling properties applied to each square element */
   const squareStyle2 = {
     width: `calc(100% / ${width})`,
@@ -176,16 +185,17 @@ const Board = ({
     const y = Math.floor(i / height);
     return (
       <div key={i} style={squareStyle2}>
-        <BoardSquare x={x} y={y} setKnightPos={setKnightPos}>
-          {renderPiece(x, y)}
+        <BoardSquare x={x} y={y} setLocalPlayer={setLocalPlayer}>
+          {Object.keys(players).map(renderPlayer(x, y))}
         </BoardSquare>
       </div>
     );
   }
-  function renderPiece(x, y) {
-    const isKnightHere = x === knightX && y === knightY;
-    return isKnightHere ? <Player /> : null;
-  }
+  const renderPlayer = (x, y) => playerId => {
+    const player = players[playerId];
+    const isPlayerHere = x === player.position.x && y === player.position.y;
+    return isPlayerHere ? <Player playerId={playerId} /> : null;
+  };
   const squares = [];
   for (let i = 0; i < width * height; i += 1) {
     squares.push(renderSquare(i));
@@ -198,15 +208,20 @@ const Board = ({
 /**
  * The Chessboard Tutorial Application
  */
-const Example = ({ width, height, playerPos, setPlayerPos }) => {
-  const [knightPos, setKnightPos] = useState([playerPos.x, playerPos.y]);
+const BoardController = ({ width, height, players, setPlayerPos }) => {
+  const [localPlayers, setLocalPlayers] = useState(players);
+  const setLocalPlayer = function(playerId, position) {
+    setLocalPlayers({
+      ...localPlayers,
+      [playerId]: {
+        ...localPlayers[playerId],
+        position
+      }
+    });
+  };
   // the observe function will return an unsubscribe callback
-  useEffect(() => setKnightPos([playerPos.x, playerPos.y]), [
-    playerPos.x,
-    playerPos.y
-  ]);
+  useEffect(() => setLocalPlayers(players), [players]);
   // the obove is all about mocking a real time db
-  console.log(knightPos);
   const containerStyle = {
     width: `calc(${width} * 80px)`,
     height: `calc(${height} * 80px)`
@@ -215,10 +230,10 @@ const Example = ({ width, height, playerPos, setPlayerPos }) => {
     <div>
       <div style={containerStyle}>
         <Board
-          knightPosition={knightPos}
-          setKnightPos={([x, y]) => {
-            setKnightPos([x, y]);
-            setPlayerPos({ x, y });
+          players={players}
+          setLocalPlayer={(playerId, position) => {
+            setLocalPlayer(playerId, position);
+            setPlayerPos(playerId, position);
           }}
           width={width}
           height={height}
@@ -246,12 +261,12 @@ function Initiative({ user, match, location, history }) {
             <Heading margin="none">{initiativeData.name}</Heading>
             <Box>
               <DndProvider backend={HTML5Backend}>
-                <Example
+                <BoardController
                   width={initiativeData.size.x}
                   height={initiativeData.size.y}
-                  playerPos={initiativeData.playerPos}
-                  setPlayerPos={({ x, y }) =>
-                    initiativeUpdate({ x, y }, "/playerPos")
+                  players={initiativeData.players}
+                  setPlayerPos={(playerId, position) =>
+                    initiativeUpdate(position, `/players/${playerId}/position`)
                   }
                 />
               </DndProvider>
