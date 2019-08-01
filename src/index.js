@@ -15,6 +15,8 @@ import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import { DndProvider, DragPreviewImage, useDrop, useDrag } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 
+import { createGlobalStyle } from "styled-components";
+
 import Firebase from "./firebase";
 import Auth from "./firebase/containers/Auth";
 import Database from "./firebase/containers/Database";
@@ -280,39 +282,78 @@ function Initiative({ user, match, location, history }) {
 
 function Dashboard({ user, match, location, history }) {
   return (
-    <Database dataRef={`/users/${user.uid}`}>
-      {({
-        data: userData,
-        update: userUpdate,
-        create: userCreate,
-        custom: userCustom
-      }) => {
-        return (
-          <>
-            <Button onClick={() => alert("go make init :P")} label="+" />
-            <div>
-              {userData &&
-                userData.initiatives &&
-                Object.keys(userData.initiatives).map(id => {
-                  return (
-                    <div>
-                      <Link to={`/initiatives/${id}`}>
-                        {id} -> {userData.initiatives[id]}
-                      </Link>
-                    </div>
-                  );
-                })}
-            </div>
-          </>
-        );
-      }}
-    </Database>
+    <>
+      <Database dataRef={`/users/${user.uid}`}>
+        {({
+          data: userData,
+          update: userUpdate,
+          create: userCreate,
+          custom: userCustom
+        }) => {
+          return (
+            <>
+              <Button onClick={() => alert("go make init :P")} label="+" />
+              <div>
+                {userData &&
+                  userData.initiatives &&
+                  Object.keys(userData.initiatives).map(id => {
+                    return (
+                      <div>
+                        <Link to={`/initiatives/${id}`}>
+                          {id} -> {userData.initiatives[id]}
+                        </Link>
+                      </div>
+                    );
+                  })}
+              </div>
+            </>
+          );
+        }}
+      </Database>
+
+      <Database dataRef={`/members/`}>
+        {({
+          data: membersData,
+          update: membersUpdate,
+          create: membersCreate,
+          custom: membersCustom
+        }) => {
+          return (
+            <>
+              <div>
+                <h2>Inits You're Apart Of</h2>
+                {membersData &&
+                  Object.keys(membersData).map(initId => {
+                    if (membersData[initId].hasOwnProperty(user.uid)) {
+                      return (
+                        <div>
+                          <Link to={`/initiatives/${initId}`}>
+                            <span>initId</span>
+                          </Link>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+              </div>
+            </>
+          );
+        }}
+      </Database>
+    </>
   );
 }
+
+const GlobalStyle = createGlobalStyle`
+  body {
+    box-sizing: border-box;
+  }
+`;
 
 function App() {
   return (
     <Grommet theme={theme}>
+      <GlobalStyle />
       <Firebase
         config={{
           apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
