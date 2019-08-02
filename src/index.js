@@ -280,67 +280,112 @@ function Initiative({ user, match, location, history }) {
   );
 }
 
+function NewInitiative({ user, match, location, history }) {
+  const [value, setValue] = useState("");
+  return (
+    <Database dataRef={`/users/${user.uid}`}>
+      {({
+        data: userData,
+        update: userUpdate,
+        create: userCreate,
+        custom: userCustom
+      }) => {
+        return (
+          <div>
+            <h1>CREATING NEW INITIATIVE</h1>
+            <TextInput
+              value={value}
+              onChange={event => setValue(event.target.value)}
+            />
+            <Button
+              label="Create"
+              onClick={() => {
+                userCustom(ref => {
+                  debugger;
+                  const initId = ref.push().key;
+                  ref.child("initiatives").update({ [initId]: value });
+                  ref.root
+                    .child("initiatives")
+                    .update({ [initId]: { [user.uid]: "owner" } });
+                  ref.root
+                    .child("members")
+                    .child(initId)
+                    .update({ [user.uid]: "DM" });
+                  ref.root
+                    .child("initiativeData")
+                    .child(initId)
+                    .update({
+                      name: value,
+                      size: {
+                        x: 3,
+                        y: 3
+                      },
+                      players: {
+                        p1: {
+                          position: {
+                            x: 1,
+                            y: 1
+                          }
+                        }
+                      }
+                    });
+                });
+              }}
+            />
+          </div>
+        );
+      }}
+    </Database>
+  );
+}
+
 function Dashboard({ user, match, location, history }) {
   return (
-    <>
-      <Database dataRef={`/users/${user.uid}`}>
-        {({
-          data: userData,
-          update: userUpdate,
-          create: userCreate,
-          custom: userCustom
-        }) => {
-          return (
-            <>
-              <Button onClick={() => alert("go make init :P")} label="+" />
+    <Database dataRef={`/users/${user.uid}`}>
+      {({
+        data: userData,
+        update: userUpdate,
+        create: userCreate,
+        custom: userCustom
+      }) => {
+        return (
+          <>
+            <Button
+              onClick={() => history.push("/initiatives/new")}
+              label="+"
+            />
+            <div>
+              <h2>Inits You're DM Of</h2>
+              {userData &&
+                userData.initiatives &&
+                Object.keys(userData.initiatives).map(id => {
+                  return (
+                    <div>
+                      <Link to={`/initiatives/${id}`}>
+                        {id} -> {userData.initiatives[id]}
+                      </Link>
+                    </div>
+                  );
+                })}
               <div>
+                <h2>Inits You're Apart Of</h2>
                 {userData &&
-                  userData.initiatives &&
-                  Object.keys(userData.initiatives).map(id => {
+                  userData.invites &&
+                  Object.keys(userData.invites).map(initId => {
                     return (
                       <div>
-                        <Link to={`/initiatives/${id}`}>
-                          {id} -> {userData.initiatives[id]}
+                        <Link to={`/initiatives/${initId}`}>
+                          <span>{userData.invites[initId]}</span>
                         </Link>
                       </div>
                     );
                   })}
               </div>
-            </>
-          );
-        }}
-      </Database>
-
-      <Database dataRef={`/members/`}>
-        {({
-          data: membersData,
-          update: membersUpdate,
-          create: membersCreate,
-          custom: membersCustom
-        }) => {
-          return (
-            <>
-              <div>
-                <h2>Inits You're Apart Of</h2>
-                {membersData &&
-                  Object.keys(membersData).map(initId => {
-                    if (membersData[initId].hasOwnProperty(user.uid)) {
-                      return (
-                        <div>
-                          <Link to={`/initiatives/${initId}`}>
-                            <span>initId</span>
-                          </Link>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })}
-              </div>
-            </>
-          );
-        }}
-      </Database>
-    </>
+            </div>
+          </>
+        );
+      }}
+    </Database>
   );
 }
 
@@ -380,6 +425,11 @@ function App() {
                   <Switch>
                     <Route path="/" exact>
                       {routeProps => <Dashboard user={user} {...routeProps} />}
+                    </Route>
+                    <Route path="/initiatives/new">
+                      {routeProps => (
+                        <NewInitiative user={user} {...routeProps} />
+                      )}
                     </Route>
                     <Route path="/initiatives/:initiativeId">
                       {routeProps => <Initiative user={user} {...routeProps} />}
