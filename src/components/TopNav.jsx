@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { Box, Heading } from "grommet";
 const AppBar = props => (
   <Box
@@ -24,9 +23,5 @@ function ButtonAppBar(props) {
     </AppBar>
   );
 }
-
-ButtonAppBar.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 
 export default ButtonAppBar;
