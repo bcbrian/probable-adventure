@@ -6,7 +6,7 @@ import Overlay from "./Overlay";
 import Square from "./Square";
 import ItemTypes from "../constants/itemTypes";
 
-const BoardSquare = ({ x, y, children, setLocalPlayer, canMoveHere }) => {
+const BoardSquare = ({ x, y, children, setLocalPlayer }) => {
   const [playerId, setPlayerId] = useState(null);
   const [{ isOver, canDrop, item }, drop] = useDrop({
     accept: ItemTypes.PLAYER,
@@ -18,6 +18,7 @@ const BoardSquare = ({ x, y, children, setLocalPlayer, canMoveHere }) => {
     },
     // drop: () => console.log(x, y),
     collect: monitor => {
+      console.log("YO this sucks", x, y);
       return {
         isOver: !!monitor.isOver(),
         canDrop: !!monitor.canDrop(),
@@ -30,28 +31,10 @@ const BoardSquare = ({ x, y, children, setLocalPlayer, canMoveHere }) => {
     setPlayerId(item.playerId);
   }, [item.playerId]);
 
-  if (canMoveHere) {
-    console.log("target");
-    return (
-      <div
-        ref={drop}
-        style={{
-          position: "relative",
-          width: "100%",
-          height: "100%"
-        }}
-      >
-        <Square>{children}</Square>
-        {/* {isOver && !canDrop && <Overlay color="red" />} */}
-        {/* {!isOver && canDrop && <Overlay color="yellow" />} */}
-        {isOver && <Overlay color="green" />}
-      </div>
-    );
-  }
-  console.log("non-target");
-
+  console.log("target");
   return (
     <div
+      ref={drop}
       style={{
         position: "relative",
         width: "100%",
