@@ -1,5 +1,5 @@
 //player
-import React from "react";
+import React, { useEffect } from "react";
 import { DragPreviewImage, useDrag } from "react-dnd";
 
 import ItemTypes from "../constants/itemTypes";
@@ -13,13 +13,21 @@ const playerStyle = {
   height: "75%",
   backgroundColor: "rebeccapurple"
 };
-const Player = ({ playerId }) => {
+const Player = ({ playerId, setDraggingPlayer, player }) => {
   const [{ isDragging }, drag, preview] = useDrag({
     item: { type: ItemTypes.PLAYER, playerId },
     collect: monitor => ({
       isDragging: !!monitor.isDragging()
     })
   });
+  useEffect(() => {
+    console.log("YAY!!!!!!!");
+    if (isDragging) {
+      setDraggingPlayer(player);
+    } else {
+      setDraggingPlayer(null);
+    }
+  }, [isDragging, setDraggingPlayer, player]);
   return (
     <>
       <DragPreviewImage connect={preview} />

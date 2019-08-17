@@ -1,5 +1,5 @@
 /// borad
-import React from "react";
+import React, { useState } from "react";
 
 import Player from "./Player";
 import BoardSquare from "./BoardSquare";
@@ -17,6 +17,8 @@ const boardStyle = {
  * @param props The react props
  */
 const Board = ({ players, setLocalPlayer, height, width }) => {
+  const [draggingPlayer, setDraggingPlayer] = useState(null);
+
   /** Styling properties applied to each square element */
   const squareStyle2 = {
     width: `calc(100% / ${width})`,
@@ -25,10 +27,24 @@ const Board = ({ players, setLocalPlayer, height, width }) => {
   console.log("width, height", width, height);
   function renderSquare(i) {
     const x = i % width;
-    const y = Math.floor((i * width) / height);
+    const y = Math.floor(i / width);
+    const { position, speed } = draggingPlayer || {};
+    const distance = 1; // speed / 5;
+    const { x: playerX, y: playerY } = position || {};
+
     return (
       <div key={i} style={squareStyle2}>
-        <BoardSquare x={x} y={y} setLocalPlayer={setLocalPlayer}>
+        <BoardSquare
+          x={x}
+          y={y}
+          setLocalPlayer={setLocalPlayer}
+          canMoveHere={
+            playerX - distance <= x &&
+            x - distance <= playerX &&
+            playerY - distance <= y &&
+            y - distance <= playerY
+          }
+        >
           {Object.keys(players).map(renderPlayer(x, y))}
           {x},{y}
         </BoardSquare>
@@ -41,10 +57,18 @@ const Board = ({ players, setLocalPlayer, height, width }) => {
     if (isPlayerHere) {
       console.log(x, y, player);
     }
-    return isPlayerHere ? <Player key={playerId} playerId={playerId} /> : null;
+    return isPlayerHere ? (
+      <Player
+        key={playerId}
+        playerId={playerId}
+        setDraggingPlayer={setDraggingPlayer}
+        player={player}
+      />
+    ) : null;
   };
   const squares = [];
   for (let i = 0; i < width * height; i += 1) {
+    console.log(i);
     squares.push(renderSquare(i));
   }
   return <div style={boardStyle}>{squares}</div>;
