@@ -1,12 +1,52 @@
-import React from "react";
+import React, { useReducer } from "react";
 import { Box, Heading } from "grommet";
-import { DndProvider } from "react-dnd";
-import HTML5Backend from "react-dnd-html5-backend";
 
 import Database from "../firebase/containers/Database";
 import BoardController from "../components/BoardController";
 
+export const InitiativeContext = React.createContext({
+  state: null,
+  dispatch: () => console.error("We are not ready yet dude!")
+});
+
+const testData = {
+  name: "test39",
+  players: { p1: { position: { x: 1, y: 1 } } },
+  size: { x: 100, y: "100" },
+  activePlayer: { id: "p1", position: { x: 1, y: 1 } } // TODO: GLOBAL?
+};
+
+const initialState = testData;
+
+function reducer(state, action) {
+  console.log("$$$$$$$$$$$$$$$$$$$$$$$$$", state, action);
+  switch (action.type) {
+    case "MOVE_USER":
+      const { position } = action.payload;
+      const playerId = state.activePlayer.id;
+      return {
+        ...state,
+        players: {
+          ...state.players,
+          [playerId]: {
+            ...state.players[playerId],
+            position
+          }
+        },
+        activePlayer: null
+      };
+    case "SET_ACTIVE_PLAYER":
+      return {
+        ...state,
+        activePlayer: action.payload
+      };
+    default:
+      throw new Error();
+  }
+}
+
 function Initiative({ user, match, location, history }) {
+  const [state, dispatch] = useReducer(reducer, initialState);
   return (
     <Database dataRef={`/initiativeData/${match.params.initiativeId}`}>
       {({
@@ -18,22 +58,21 @@ function Initiative({ user, match, location, history }) {
         if (!initiativeData) {
           return <div>ask your dm for access...</div>;
         }
+        console.log(JSON.stringify(initiativeData));
         return (
-          <div>
+          <InitiativeContext.Provider value={{ state, dispatch }}>
             <Heading margin="none">{initiativeData.name}</Heading>
             <Box>
-              <DndProvider backend={HTML5Backend}>
-                <BoardController
-                  width={initiativeData.size.x}
-                  height={initiativeData.size.y}
-                  players={initiativeData.players}
-                  setPlayerPos={(playerId, position) =>
-                    initiativeUpdate(position, `/players/${playerId}/position`)
-                  }
-                />
-              </DndProvider>
+              <BoardController
+                // width={initiativeData.size.x}
+                // height={initiativeData.size.y}
+                // players={initiativeData.players}
+                setPlayerPos={(playerId, position) => console.log("updated db")}
+                // initiativeUpdate(position, `/players/${playerId}/position`)
+                // }
+              />
             </Box>
-          </div>
+          </InitiativeContext.Provider>
         );
       }}
     </Database>

@@ -1,8 +1,6 @@
 //player
-import React, { useEffect } from "react";
-import { DragPreviewImage, useDrag } from "react-dnd";
-
-import ItemTypes from "../constants/itemTypes";
+import React, { useState, useMemo, useContext } from "react";
+import { InitiativeContext } from "../routes/Initiative";
 
 const playerStyle = {
   fontSize: 40,
@@ -13,29 +11,21 @@ const playerStyle = {
   height: "75%",
   backgroundColor: "rebeccapurple"
 };
-const Player = ({ playerId, setDraggingPlayer, player }) => {
-  const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.PLAYER, playerId },
-    collect: monitor => ({
-      isDragging: !!monitor.isDragging()
-    })
-  });
-  useEffect(() => {
-    console.log("YAY!!!!!!!");
-    if (isDragging) {
-      setDraggingPlayer(player);
-    } else {
-      setDraggingPlayer(null);
-    }
-  }, [isDragging, setDraggingPlayer, player]);
+const Player = ({ playerId, player }) => {
+  const { state, dispatch } = useContext(InitiativeContext);
+
   return (
     <>
-      <DragPreviewImage connect={preview} />
       <div
-        ref={drag}
+        onClick={() =>
+          dispatch({
+            type: "SET_ACTIVE_PLAYER",
+            payload: { id: playerId, ...player }
+          })
+        }
         style={{
-          ...playerStyle,
-          opacity: isDragging ? 0.6 : 1
+          ...playerStyle
+          // opacity: isDragging ? 0.6 : 1
         }}
       />
     </>

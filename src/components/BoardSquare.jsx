@@ -1,51 +1,28 @@
 /// board square
-import React, { useState, useEffect } from "react";
-import { useDrop } from "react-dnd";
+import React, { useState, useEffect, useMemo } from "react";
 
 import Overlay from "./Overlay";
 import Square from "./Square";
 import ItemTypes from "../constants/itemTypes";
 
 const BoardSquare = ({ x, y, children, setLocalPlayer }) => {
-  const [playerId, setPlayerId] = useState(null);
-  const [{ isOver, canDrop, item }, drop] = useDrop({
-    accept: ItemTypes.PLAYER,
-    // canDrop: () => canMoveKnight(x, y),
-    drop: () => {
-      // debugger;
-      setLocalPlayer(playerId, { x, y });
-      setPlayerId(null);
-    },
-    // drop: () => console.log(x, y),
-    collect: monitor => {
-      console.log("YO this sucks", x, y);
-      return {
-        isOver: !!monitor.isOver(),
-        canDrop: !!monitor.canDrop(),
-        item: monitor.getItem() || {}
-      };
-    }
-  });
-
-  useEffect(() => {
-    setPlayerId(item.playerId);
-  }, [item.playerId]);
-
-  console.log("target");
-  return (
-    <div
-      ref={drop}
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100%"
-      }}
-    >
-      <Square>{children}</Square>
-      {/* {isOver && !canDrop && <Overlay color="red" />} */}
-      {/* {!isOver && canDrop && <Overlay color="yellow" />} */}
-      {isOver && <Overlay color="green" />}
-    </div>
+  return useMemo(
+    () => (
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "100%"
+        }}
+        onClick={() => setLocalPlayer({ x, y })}
+      >
+        <Square>{children}</Square>
+        {/* {isOver && !canDrop && <Overlay color="red" />} */}
+        {/* {!isOver && canDrop && <Overlay color="yellow" />} */}
+        <Overlay color="green" />
+      </div>
+    ),
+    [x, y, children, setLocalPlayer]
   );
 };
 
