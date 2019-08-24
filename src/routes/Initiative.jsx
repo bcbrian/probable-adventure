@@ -11,9 +11,15 @@ export const InitiativeContext = React.createContext({
 
 const testData = {
   name: "test39",
-  players: { p1: { position: { x: 1, y: 1 } } },
+  players: {
+    p1: { position: { x: 0, y: 0 } },
+    p2: { position: { x: 1, y: 0 } },
+    p3: { position: { x: 1, y: 1 } },
+    p4: { position: { x: 0, y: 1 } },
+    p5: { position: { x: 2, y: 2 } }
+  },
   size: { x: 100, y: "100" },
-  activePlayer: { id: "p1", position: { x: 1, y: 1 } } // TODO: GLOBAL?
+  activePlayer: null // TODO: GLOBAL?
 };
 
 const initialState = testData;

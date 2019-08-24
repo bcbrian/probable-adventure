@@ -4,10 +4,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import Square from "./Square";
 
 const BoardSquareAlt = ({ children }) => {
-  console.log("non-target");
-
-  return useMemo(
-    () => (
+  return useMemo(() => {
+    console.log("non-target");
+    return (
       <div
         style={{
           position: "relative",
@@ -17,9 +16,8 @@ const BoardSquareAlt = ({ children }) => {
       >
         <Square>{children}</Square>
       </div>
-    ),
-    [children]
-  );
+    );
+  }, [children]);
 };
 
 export default BoardSquareAlt;

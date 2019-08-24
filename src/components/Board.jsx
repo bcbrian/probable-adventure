@@ -41,7 +41,7 @@ function RenderSquare({ i }) {
   let canMoveHere = false;
   if (activePlayer) {
     const { position, speed } = activePlayer;
-    const distance = 1; // speed / 5;
+    const distance = 6; // speed / 5;
     const { x: playerX, y: playerY } = position || {};
     canMoveHere =
       playerX - distance <= x &&
@@ -58,32 +58,28 @@ function RenderSquare({ i }) {
 
     return (
       <div key={i} style={squareStyle2}>
-        {canMoveHere && (
-          <BoardSquare
-            x={x}
-            y={y}
-            setLocalPlayer={position =>
-              dispatch({
-                type: "MOVE_USER",
-                payload: {
-                  position
-                }
-              })
-            }
-          >
-            {Object.keys(players).map(renderPlayer(x, y, players))}
-            {x},{y}
-          </BoardSquare>
-        )}
-        {!canMoveHere && (
-          <BoardSquareAlt x={x} y={y}>
-            {Object.keys(players).map(renderPlayer(x, y, players))}
-            {x},{y}
-          </BoardSquareAlt>
-        )}
+        <BoardSquare
+          x={x}
+          y={y}
+          canMoveHere={canMoveHere}
+          setLocalPlayer={
+            canMoveHere
+              ? position =>
+                  dispatch({
+                    type: "MOVE_USER",
+                    payload: {
+                      position
+                    }
+                  })
+              : () => {}
+          }
+        >
+          {Object.keys(players).map(renderPlayer(x, y, players))}
+          {x},{y}
+        </BoardSquare>
       </div>
     );
-  }, [x, y, canMoveHere, width, height, dispatch, i, players]);
+  }, [x, y, canMoveHere, width, height, dispatch, i]);
 }
 
 /**

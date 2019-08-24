@@ -3,11 +3,11 @@ import React, { useState, useEffect, useMemo } from "react";
 
 import Overlay from "./Overlay";
 import Square from "./Square";
-import ItemTypes from "../constants/itemTypes";
 
-const BoardSquare = ({ x, y, children, setLocalPlayer }) => {
-  return useMemo(
-    () => (
+const BoardSquare = ({ x, y, children, setLocalPlayer, canMoveHere }) => {
+  return useMemo(() => {
+    console.log("change >> ");
+    return (
       <div
         style={{
           position: "relative",
@@ -19,11 +19,10 @@ const BoardSquare = ({ x, y, children, setLocalPlayer }) => {
         <Square>{children}</Square>
         {/* {isOver && !canDrop && <Overlay color="red" />} */}
         {/* {!isOver && canDrop && <Overlay color="yellow" />} */}
-        <Overlay color="green" />
+        {canMoveHere && <Overlay color="green" />}
       </div>
-    ),
-    [x, y, children, setLocalPlayer]
-  );
+    );
+  }, [x, y, children, setLocalPlayer, canMoveHere]);
 };
 
 export default BoardSquare;
