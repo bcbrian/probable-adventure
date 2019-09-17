@@ -6,7 +6,7 @@ import Square from "./Square";
 
 const BoardSquare = ({ x, y, children, setLocalPlayer, canMoveHere }) => {
   return useMemo(() => {
-    console.log("change >> ");
+    // console.log("change >> ");
     return (
       <div
         style={{

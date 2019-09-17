@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useEffect } from "react";
 import { Box, Heading } from "grommet";
 
 import Database from "../firebase/containers/Database";
@@ -22,11 +22,13 @@ const testData = {
   activePlayer: null // TODO: GLOBAL?
 };
 
-const initialState = testData;
+const initialState = {};
 
 function reducer(state, action) {
   console.log("$$$$$$$$$$$$$$$$$$$$$$$$$", state, action);
   switch (action.type) {
+    case "LOAD_DATA_FROM_DB":
+      return action.payload;
     case "MOVE_USER":
       const { position } = action.payload;
       const playerId = state.activePlayer.id;
@@ -51,8 +53,44 @@ function reducer(state, action) {
   }
 }
 
-function Initiative({ user, match, location, history }) {
+function InitiativeRender({
+  initiativeData,
+  initiativeUpdate,
+  initiativeCreate,
+  initiativeCustom
+}) {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    dispatch({ type: "LOAD_DATA_FROM_DB", payload: initiativeData });
+  }, [initiativeData]);
+  console.log(JSON.stringify(initiativeData));
+  return (
+    <InitiativeContext.Provider
+      value={{
+        state,
+        dispatch,
+        initiativeUpdate,
+        initiativeCreate,
+        initiativeCustom
+      }}
+    >
+      <Heading margin="none">{initiativeData.name}</Heading>
+      <Box>
+        <BoardController
+        // width={initiativeData.size.x}
+        // height={initiativeData.size.y}
+        // players={initiativeData.players}
+        // setPlayerPos={(playerId, position) =>
+        //   initiativeUpdate(position, `/players/${playerId}/position`)
+        // }
+        />
+      </Box>
+    </InitiativeContext.Provider>
+  );
+}
+
+function Initiative({ user, match, location, history }) {
   return (
     <Database dataRef={`/initiativeData/${match.params.initiativeId}`}>
       {({
@@ -64,21 +102,13 @@ function Initiative({ user, match, location, history }) {
         if (!initiativeData) {
           return <div>ask your dm for access...</div>;
         }
-        console.log(JSON.stringify(initiativeData));
         return (
-          <InitiativeContext.Provider value={{ state, dispatch }}>
-            <Heading margin="none">{initiativeData.name}</Heading>
-            <Box>
-              <BoardController
-                // width={initiativeData.size.x}
-                // height={initiativeData.size.y}
-                // players={initiativeData.players}
-                setPlayerPos={(playerId, position) => console.log("updated db")}
-                // initiativeUpdate(position, `/players/${playerId}/position`)
-                // }
-              />
-            </Box>
-          </InitiativeContext.Provider>
+          <InitiativeRender
+            initiativeData={initiativeData}
+            initiativeUpdate={initiativeUpdate}
+            initiativeCreate={initiativeCreate}
+            initiativeCustom={initiativeCustom}
+          />
         );
       }}
     </Database>

@@ -20,9 +20,9 @@ const boardStyle = {
 const renderPlayer = (x, y, players) => playerId => {
   const player = players[playerId];
   const isPlayerHere = x === player.position.x && y === player.position.y;
-  if (isPlayerHere) {
-    console.log(x, y, player);
-  }
+  // if (isPlayerHere) {
+  //   console.log(x, y, player);
+  // }
   return isPlayerHere ? (
     <Player key={playerId} playerId={playerId} player={player} />
   ) : null;
@@ -30,7 +30,14 @@ const renderPlayer = (x, y, players) => playerId => {
 
 //
 function RenderSquare({ i }) {
-  const { state, dispatch } = useContext(InitiativeContext);
+  const {
+    state,
+    dispatch,
+    initiativeUpdate,
+    initiativeCreate,
+    initiativeCustom
+  } = useContext(InitiativeContext);
+
   const activePlayer = state.activePlayer;
   const players = state.players;
   const width = state.size.x;
@@ -64,13 +71,18 @@ function RenderSquare({ i }) {
           canMoveHere={canMoveHere}
           setLocalPlayer={
             canMoveHere
-              ? position =>
-                  dispatch({
-                    type: "MOVE_USER",
-                    payload: {
-                      position
-                    }
-                  })
+              ? position => {
+                  initiativeUpdate(
+                    position,
+                    `/players/${activePlayer.id}/position`
+                  );
+                  // dispatch({
+                  //   type: "MOVE_USER",
+                  //   payload: {
+                  //     position
+                  //   }
+                  // })
+                }
               : () => {}
           }
         >

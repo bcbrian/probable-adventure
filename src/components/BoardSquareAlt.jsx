@@ -5,7 +5,7 @@ import Square from "./Square";
 
 const BoardSquareAlt = ({ children }) => {
   return useMemo(() => {
-    console.log("non-target");
+    // console.log("non-target");
     return (
       <div
         style={{

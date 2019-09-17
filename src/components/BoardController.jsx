@@ -6,8 +6,12 @@ import { InitiativeContext } from "../routes/Initiative";
 
 const BoardController = ({ setPlayerPos }) => {
   const { state } = useContext(InitiativeContext);
-  const width = state.size.x;
-  const height = state.size.y;
+  let width = 0;
+  let height = 0;
+  if (state.size) {
+    width = state.size.x;
+    height = state.size.y;
+  }
 
   return useMemo(() => {
     const containerStyle = {
