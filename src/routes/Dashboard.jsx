@@ -15,6 +15,7 @@ function Dashboard({ user, match, location, history }) {
       }) => {
         return (
           <>
+            <h1>{user.uid}</h1>
             <Button
               onClick={() => history.push("/initiatives/new")}
               label="+"

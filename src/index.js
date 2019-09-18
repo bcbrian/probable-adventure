@@ -10,6 +10,7 @@ import Authenticate from "./components/Authenticate";
 import TopNav from "./components/TopNav";
 
 import Initiative from "./routes/Initiative";
+import InitiativeAddUser from "./routes/InitiativeAddUser";
 import NewInitiative from "./routes/NewInitiative";
 import Dashboard from "./routes/Dashboard";
 
@@ -65,6 +66,11 @@ function App() {
                     <Route path="/initiatives/new">
                       {routeProps => (
                         <NewInitiative user={user} {...routeProps} />
+                      )}
+                    </Route>
+                    <Route path="/initiatives/:initiativeId/add-user">
+                      {routeProps => (
+                        <InitiativeAddUser user={user} {...routeProps} />
                       )}
                     </Route>
                     <Route path="/initiatives/:initiativeId">
