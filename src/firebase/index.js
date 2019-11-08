@@ -1,37 +1,20 @@
-import React, { useEffect, useState } from "react";
-import firebase from "firebase";
+// Firebase App (the core Firebase SDK) is always required and must be listed first
+import * as firebase from "firebase/app";
+// Add the Firebase products that you want to use
+import "firebase/auth";
+import "firebase/firestore";
 
-const FirebaseContext = React.createContext({
-  // default firebase context
-});
+const firebaseConfig = {
+  apiKey: "AIzaSyBpxhV4nRK_fDtSIa9FxiTIJubvJOyZW-4",
+  authDomain: "code-quests.firebaseapp.com",
+  databaseURL: "https://code-quests.firebaseio.com",
+  projectId: "code-quests",
+  storageBucket: "code-quests.appspot.com",
+  messagingSenderId: "184721895245",
+  appId: "1:184721895245:web:027227f4ee68dfcc8e5104"
+};
 
-export default function Firebase({ config, children }) {
-  const [fb, setFb] = useState({
-    firebase: null,
-    database: null,
-    auth: null
-  });
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
 
-  useEffect(() => {
-    firebase.initializeApp(config);
-    const database = firebase.database();
-    const auth = firebase.auth();
-
-    setFb({
-      firebase,
-      database,
-      auth
-    });
-  }, [config.apiKey]);
-
-  return (
-    <FirebaseContext.Provider value={{ ...fb }}>
-      {children}
-    </FirebaseContext.Provider>
-  );
-}
-
-export { FirebaseContext };
-
-// export const database = firebase.database();
-// export const auth = firebase.auth();
+export { firebase };

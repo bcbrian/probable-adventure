@@ -1,32 +1,34 @@
 {
-  "name": "probable-adventure",
+  "name": "new",
   "version": "1.0.0",
-  "description": "On an adventure? Need a way to track the battle try this!",
+  "description": "",
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
-    "firebase": "6.3.1",
-    "grommet": "2.7.4",
-    "react": "16.8.6",
-    "react-dom": "16.8.6",
-    "react-router-dom": "5.0.1",
-    "react-scripts": "3.0.1",
-    "shortid": "2.2.15",
-    "styled-components": "4.3.2"
+    "@emotion/core": "10.0.21",
+    "@testing-library/jest-dom": "4.1.2",
+    "@testing-library/react": "9.3.0",
+    "firebase": "6.6.1",
+    "firebase-tools": "7.6.1",
+    "lodash": "4.17.15",
+    "react": "16.10.2",
+    "react-dom": "16.10.2",
+    "react-router-dom": "5.1.2",
+    "react-scripts": "3.2.0",
+    "react-transition-group": "4.3.0",
+    "recharts": "1.8.3"
   },
   "devDependencies": {
     "typescript": "3.3.3"
   },
   "scripts": {
+    "install": "cd functions && yarn",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "firebase": "firebase",
+    "deploy": "yarn firebase deploy"
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ]
+  "browserslist": [">0.2%", "not dead", "not ie <= 11", "not op_mini all"]
 }
